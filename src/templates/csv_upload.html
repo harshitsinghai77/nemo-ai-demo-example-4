@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+
+{% block title %}CSV Upload - User Data{% endblock %}
+
+{% block content %}
+<h1>📊 CSV Upload - User Data</h1>
+<p>Upload a CSV file with user data to preview and submit to the system.</p>
+
+<div class="upload-section">
+    <h3>File Requirements</h3>
+    <ul>
+        <li>Only <strong>.csv</strong> files are accepted</li>
+        <li>Maximum file size: <strong>5MB</strong></li>
+        <li>Expected columns: user_id, name, email, phone_number, country, state, city, signup_date, last_active_date</li>
+        <li>Extra columns will be ignored</li>
+        <li>Missing columns are acceptable</li>
+    </ul>
+</div>
+
+<div class="upload-area" id="uploadArea">
+    <div class="upload-content">
+        <h3>📁 Drag & Drop CSV File Here</h3>
+        <p>or</p>
+        <input type="file" id="fileInput" accept=".csv" style="display: none;">
+        <button id="selectFileBtn" class="btn-primary">Select File</button>
+    </div>
+</div>
+
+<div class="file-info" id="fileInfo" style="display: none;">
+    <h4>Selected File</h4>
+    <p><strong>Name:</strong> <span id="fileName"></span></p>
+    <p><strong>Size:</strong> <span id="fileSize"></span></p>
+    <button id="uploadBtn" class="btn-primary">Upload & Preview</button>
+    <button id="cancelBtn" class="btn-secondary">Cancel</button>
+</div>
+
+<div class="loading" id="loading" style="display: none;">
+    <p>⏳ Processing file...</p>
+</div>
+
+<div class="error-message" id="errorMessage" style="display: none;">
+    <h4>❌ Error</h4>
+    <p id="errorText"></p>
+</div>
+
+<div class="preview-section" id="previewSection" style="display: none;">
+    <h3>📋 Preview</h3>
+    <div class="preview-info">
+        <p><strong>Status:</strong> <span id="previewStatus"></span></p>
+        <p><strong>Message:</strong> <span id="previewMessage"></span></p>
+        <p><strong>Total Rows:</strong> <span id="totalRows"></span></p>
+        <p><strong>Valid Rows:</strong> <span id="validRows"></span></p>
+        <p><strong>Valid Columns:</strong> <span id="validColumns"></span></p>
+        <p><strong>Invalid Columns:</strong> <span id="invalidColumns"></span></p>
+    </div>
+
+    <div class="preview-errors" id="previewErrors" style="display: none;">
+        <h4>⚠️ Validation Errors</h4>
+        <ul id="errorsList"></ul>
+    </div>
+
+    <div class="preview-table">
+        <h4>Data Preview (first 10 rows)</h4>
+        <div class="table-container">
+            <table id="previewTable">
+                <thead id="previewTableHead"></thead>
+                <tbody id="previewTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button id="submitBtn" class="btn-success">✅ Submit to System</button>
+        <button id="cancelPreviewBtn" class="btn-secondary">❌ Cancel</button>
+    </div>
+</div>
+
+<div class="success-section" id="successSection" style="display: none;">
+    <h3>✅ Upload Successful</h3>
+    <div class="success-info">
+        <p><strong>S3 File:</strong> <span id="s3FileKey"></span></p>
+        <p><strong>Records Written:</strong> <span id="recordsWritten"></span></p>
+        <p><strong>Status:</strong> <span id="uploadStatus"></span></p>
+    </div>
+    <button id="uploadAnotherBtn" class="btn-primary">Upload Another File</button>
+</div>
+
+<p><a href="/">← Back to API Documentation</a></p>
+
+<style>
+.upload-section {
+    background: #f8f9fa;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+    border-left: 4px solid #17a2b8;
+}
+
+.upload-area {
+    border: 3px dashed #ccc;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    margin: 20px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover, .upload-area.dragover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.upload-content h3 {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.btn-primary, .btn-secondary, .btn-success {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-primary:hover, .btn-secondary:hover, .btn-success:hover {
+    opacity: 0.9;
+}
+
+.file-info, .preview-section, .success-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.loading {
+    text-align: center;
+    color: #007bff;
+    font-size: 16px;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.preview-info p {
+    margin: 5px 0;
+}
+
+.preview-errors {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.table-container {
+    max-height: 400px;
+    overflow: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+#previewTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#previewTable th,
+#previewTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#previewTable th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+}
+
+.action-buttons {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.success-section {
+    background: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+</style>
+
+<script>
+let selectedFile = null;
+let previewData = null;
+
+// DOM elements
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const selectFileBtn = document.getElementById('selectFileBtn');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const fileSize = document.getElementById('fileSize');
+const uploadBtn = document.getElementById('uploadBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const loading = document.getElementById('loading');
+const errorMessage = document.getElementById('errorMessage');
+const errorText = document.getElementById('errorText');
+const previewSection = document.getElementById('previewSection');
+const successSection = document.getElementById('successSection');
+
+// File selection
+selectFileBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', handleFileSelect);
+
+// Drag and drop
+uploadArea.addEventListener('dragover', handleDragOver);
+uploadArea.addEventListener('dragleave', handleDragLeave);
+uploadArea.addEventListener('drop', handleDrop);
+uploadArea.addEventListener('click', () => fileInput.click());
+
+// Buttons
+uploadBtn.addEventListener('click', uploadFile);
+cancelBtn.addEventListener('click', resetUpload);
+document.getElementById('cancelPreviewBtn').addEventListener('click', resetUpload);
+document.getElementById('submitBtn').addEventListener('click', submitFile);
+document.getElementById('uploadAnotherBtn').addEventListener('click', resetUpload);
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        validateAndShowFile(file);
+    }
+}
+
+function handleDragOver(event) {
+    event.preventDefault();
+    uploadArea.classList.add('dragover');
+}
+
+function handleDragLeave(event) {
+    event.preventDefault();
+    uploadArea.classList.remove('dragover');
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    uploadArea.classList.remove('dragover');
+    
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        validateAndShowFile(files[0]);
+    }
+}
+
+function validateAndShowFile(file) {
+    // Client-side validation
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        showError('Only .csv files are accepted.');
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+        showError(`File size exceeds 5MB limit. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        return;
+    }
+    
+    selectedFile = file;
+    fileName.textContent = file.name;
+    fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+    
+    hideAll();
+    fileInfo.style.display = 'block';
+}
+
+function uploadFile() {
+    if (!selectedFile) return;
+    
+    hideAll();
+    loading.style.display = 'block';
+    
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    
+    fetch('/csv-preview', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideAll();
+        if (data.status === 'error') {
+            showError(data.message + (data.errors ? '\n' + data.errors.join('\n') : ''));
+        } else {
+            showPreview(data);
+        }
+    })
+    .catch(error => {
+        hideAll();
+        showError('Failed to upload file: ' + error.message);
+    });
+}
+
+function submitFile() {
+    if (!selectedFile) return;
+    
+    hideAll();
+    loading.style.display = 'block';
+    
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    
+    fetch('/csv-submit', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideAll();
+        if (data.status === 'error') {
+            showError(data.message + (data.errors ? '\n' + data.errors.join('\n') : ''));
+        } else {
+            showSuccess(data);
+        }
+    })
+    .catch(error => {
+        hideAll();
+        showError('Failed to submit file: ' + error.message);
+    });
+}
+
+function showPreview(data) {
+    previewData = data;
+    
+    // Update preview info
+    document.getElementById('previewStatus').textContent = data.status;
+    document.getElementById('previewMessage').textContent = data.message;
+    document.getElementById('totalRows').textContent = data.total_rows;
+    document.getElementById('validRows').textContent = data.valid_rows;
+    document.getElementById('validColumns').textContent = data.valid_columns.join(', ') || 'None';
+    document.getElementById('invalidColumns').textContent = data.invalid_columns.join(', ') || 'None';
+    
+    // Show errors if any
+    if (data.errors && data.errors.length > 0) {
+        const errorsList = document.getElementById('errorsList');
+        errorsList.innerHTML = '';
+        data.errors.forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = error;
+            errorsList.appendChild(li);
+        });
+        document.getElementById('previewErrors').style.display = 'block';
+    }
+    
+    // Build preview table
+    const tableHead = document.getElementById('previewTableHead');
+    const tableBody = document.getElementById('previewTableBody');
+    
+    tableHead.innerHTML = '';
+    tableBody.innerHTML = '';
+    
+    if (data.preview_data && data.preview_data.length > 0) {
+        // Create header
+        const headerRow = document.createElement('tr');
+        const columns = Object.keys(data.preview_data[0]);
+        columns.forEach(col => {
+            const th = document.createElement('th');
+            th.textContent = col;
+            // Highlight valid columns
+            if (data.valid_columns.includes(col)) {
+                th.style.backgroundColor = '#d4edda';
+            }
+            headerRow.appendChild(th);
+        });
+        tableHead.appendChild(headerRow);
+        
+        // Create data rows
+        data.preview_data.forEach(row => {
+            const tr = document.createElement('tr');
+            columns.forEach(col => {
+                const td = document.createElement('td');
+                td.textContent = row[col] || '';
+                tr.appendChild(td);
+            });
+            tableBody.appendChild(tr);
+        });
+    }
+    
+    previewSection.style.display = 'block';
+}
+
+function showSuccess(data) {
+    document.getElementById('s3FileKey').textContent = data.s3_file_key || 'N/A';
+    document.getElementById('recordsWritten').textContent = data.dynamodb_records_written || 0;
+    document.getElementById('uploadStatus').textContent = data.status;
+    
+    successSection.style.display = 'block';
+}
+
+function showError(message) {
+    errorText.textContent = message;
+    errorMessage.style.display = 'block';
+}
+
+function hideAll() {
+    fileInfo.style.display = 'none';
+    loading.style.display = 'none';
+    errorMessage.style.display = 'none';
+    previewSection.style.display = 'none';
+    successSection.style.display = 'none';
+    document.getElementById('previewErrors').style.display = 'none';
+}
+
+function resetUpload() {
+    selectedFile = null;
+    previewData = null;
+    fileInput.value = '';
+    hideAll();
+    uploadArea.style.display = 'block';
+}
+</script>
+{% endblock %}

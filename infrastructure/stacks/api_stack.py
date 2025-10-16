@@ -4,13 +4,59 @@ from aws_cdk import (
     CfnOutput,
     aws_lambda as _lambda,
     aws_iam as iam,
+    aws_s3 as s3,
+    aws_dynamodb as dynamodb,
+    RemovalPolicy,
 )
 from constructs import Construct
 
 
 class ApiStack(Stack):
+    """
+    CDK Stack for the Nemo AI Demo API with CSV upload functionality.
+    
+    This stack provisions:
+    - Lambda function with Function URL
+    - S3 bucket for CSV file storage
+    - DynamoDB table for user data storage
+    - Required IAM permissions
+    """
+    
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+        """
+        Initialize the API stack.
+        
+        Args:
+            scope: The scope in which to define this construct
+            construct_id: The scoped construct ID
+            **kwargs: Additional keyword arguments
+        """
         super().__init__(scope, construct_id, **kwargs)
+
+        # S3 Bucket for CSV storage
+        csv_bucket = s3.Bucket(
+            self,
+            "CsvStorageBucket",
+            bucket_name="nemo-ai-demo-example-4-bucket",  # As specified in Jira story
+            public_read_access=False,
+            public_write_access=False,
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            encryption=s3.BucketEncryption.S3_MANAGED,
+            removal_policy=RemovalPolicy.DESTROY,
+            auto_delete_objects=True,  # For demo purposes
+        )
+
+        # DynamoDB Table for user data
+        user_data_table = dynamodb.Table(
+            self,
+            "UserDataTable",
+            table_name="nemo-ai-demo-example-4-user-data",
+            partition_key=dynamodb.Attribute(
+                name="entry_id", type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY,  # For demo purposes
+        )
 
         # Lambda execution role
         lambda_role = iam.Role(
@@ -23,6 +69,10 @@ class ApiStack(Stack):
                 ),
             ],
         )
+
+        # Grant Lambda permissions to S3 and DynamoDB
+        csv_bucket.grant_read_write(lambda_role)
+        user_data_table.grant_read_write_data(lambda_role)
 
         # Lambda function
         api_function = _lambda.Function(
@@ -38,6 +88,8 @@ class ApiStack(Stack):
                 "POWERTOOLS_SERVICE_NAME": "api-service",
                 "POWERTOOLS_METRICS_NAMESPACE": "ApiService",
                 "LOG_LEVEL": "INFO",
+                "S3_BUCKET_NAME": csv_bucket.bucket_name,
+                "DYNAMODB_TABLE_NAME": user_data_table.table_name,
             },
         )
 
@@ -71,4 +123,18 @@ class ApiStack(Stack):
             "FunctionName",
             value=api_function.function_name,
             description="Lambda Function Name",
+        )
+
+        CfnOutput(
+            self,
+            "S3BucketName",
+            value=csv_bucket.bucket_name,
+            description="S3 Bucket for CSV Storage",
+        )
+
+        CfnOutput(
+            self,
+            "DynamoDBTableName",
+            value=user_data_table.table_name,
+            description="DynamoDB Table for User Data",
         )

@@ -4,7 +4,6 @@ from aws_cdk import (
     CfnOutput,
     aws_lambda as _lambda,
     aws_iam as iam,
-    aws_logs as logs,
 )
 from constructs import Construct
 
@@ -29,7 +28,7 @@ class ApiStack(Stack):
         api_function = _lambda.Function(
             self,
             "ApiFunction",
-            runtime=_lambda.Runtime.PYTHON_3_11,
+            runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
             code=_lambda.Code.from_asset("../src"),
             role=lambda_role,
@@ -40,8 +39,6 @@ class ApiStack(Stack):
                 "POWERTOOLS_METRICS_NAMESPACE": "ApiService",
                 "LOG_LEVEL": "INFO",
             },
-
-            log_retention=logs.RetentionDays.ONE_WEEK,
         )
 
         # Function URL

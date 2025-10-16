@@ -63,13 +63,31 @@ jobs:
         run: |
           npm install -g aws-cdk
           
-      - name: Install Python dependencies
+      - name: Create Lambda deployment package
+        run: |
+          # Create deployment directory
+          mkdir -p lambda-package
+          
+          # Copy source code
+          cp -r src/* lambda-package/
+          
+          # Install dependencies into the package
+          pip install -r requirements.txt -t lambda-package/
+          
+          # Create zip file
+          cd lambda-package
+          zip -r ../lambda-deployment.zip .
+          cd ..
+          
+      - name: Install CDK dependencies
         run: |
           cd infrastructure
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
       - name: Deploy infrastructure
+        env:
+          JSII_SILENCE_WARNING_DEPRECATED_NODE_VERSION: true
         run: |
           cd infrastructure
           cdk deploy --require-approval never

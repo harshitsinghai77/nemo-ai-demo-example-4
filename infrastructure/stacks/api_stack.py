@@ -30,7 +30,7 @@ class ApiStack(Stack):
             "ApiFunction",
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset("../src"),
+            code=_lambda.Code.from_asset("../lambda-deployment.zip"),
             role=lambda_role,
             timeout=Duration.seconds(30),
             memory_size=256,

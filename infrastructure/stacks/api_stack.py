@@ -53,8 +53,7 @@ class ApiStack(Stack):
                     _lambda.HttpMethod.GET, 
                     _lambda.HttpMethod.POST,
                     _lambda.HttpMethod.PUT,
-                    _lambda.HttpMethod.DELETE,
-                    _lambda.HttpMethod.OPTIONS
+                    _lambda.HttpMethod.DELETE
                 ],
                 allowed_headers=["*"],
                 allow_credentials=False,

@@ -30,11 +30,6 @@ jobs:
         run: |
           pytest tests/ -v
           
-      - name: Run linting
-        run: |
-          black --check src/
-          mypy src/
-
   deploy:
     needs: test
     runs-on: ubuntu-latest

@@ -1,22 +1,15 @@
 import json
-import uuid
 from typing import Dict, Any
 from datetime import datetime, timedelta
-from aws_lambda_powertools import Logger, Tracer, Metrics
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.metrics import MetricUnit
 from aws_lambda_powertools.event_handler import LambdaFunctionUrlResolver, Response, content_types
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
-from models import (
+from .models import (
     PingResponse, HelloResponse, StatusResponse, User, 
     CreateUserRequest, CreateUserResponse, ErrorResponse
 )
 
-logger = Logger()
-tracer = Tracer()
-metrics = Metrics()
 app = LambdaFunctionUrlResolver()
 
 # Initialize Jinja2 environment
@@ -33,7 +26,7 @@ MOCK_USERS = {
         name="John Doe",
         email="john@example.com",
         active=True,
-        created_at=datetime.now() - timedelta(days=30),
+        created_at=(datetime.now() - timedelta(days=30)).isoformat(),
         recent_activity=["Logged in", "Updated profile", "Viewed dashboard"]
     ),
     "2": User(
@@ -41,19 +34,15 @@ MOCK_USERS = {
         name="Jane Smith",
         email="jane@example.com",
         active=True,
-        created_at=datetime.now() - timedelta(days=15),
+        created_at=(datetime.now() - timedelta(days=15)).isoformat(),
         recent_activity=["Created account", "Completed onboarding"]
     )
 }
 
 
 @app.get("/")
-@tracer.capture_method
 def index() -> Response:
     """API documentation homepage"""
-    logger.info("Index endpoint called")
-    metrics.add_metric(name="IndexRequests", unit=MetricUnit.Count, value=1)
-    
     template = jinja_env.get_template('index.html')
     html_content = template.render()
     
@@ -65,24 +54,16 @@ def index() -> Response:
 
 
 @app.get("/ping")
-@tracer.capture_method
 def ping() -> Dict[str, Any]:
     """Health check endpoint"""
-    logger.info("Ping endpoint called")
-    metrics.add_metric(name="PingRequests", unit=MetricUnit.Count, value=1)
-    
     response = PingResponse(message="pong", status="healthy")
     return response.model_dump()
 
 
 @app.get("/hello")
-@tracer.capture_method
 def hello() -> Dict[str, Any]:
     """Hello world endpoint"""
     name = app.current_event.query_string_parameters.get("name") if app.current_event.query_string_parameters else None
-    
-    logger.info("Hello endpoint called", extra={"name": name})
-    metrics.add_metric(name="HelloRequests", unit=MetricUnit.Count, value=1)
     
     if name:
         message = f"Hello, {name}!"
@@ -94,15 +75,11 @@ def hello() -> Dict[str, Any]:
 
 
 @app.get("/status")
-@tracer.capture_method
 def status() -> Dict[str, Any]:
     """Detailed system status endpoint"""
-    logger.info("Status endpoint called")
-    metrics.add_metric(name="StatusRequests", unit=MetricUnit.Count, value=1)
-    
     response = StatusResponse(
         status="healthy",
-        timestamp=datetime.now(),
+        timestamp=datetime.now().isoformat(),
         version="1.0.0",
         uptime="Running",
         environment=os.environ.get("ENVIRONMENT", "production")
@@ -111,11 +88,8 @@ def status() -> Dict[str, Any]:
 
 
 @app.get("/users/<user_id>")
-@tracer.capture_method
 def get_user(user_id: str) -> Any:
     """Get user by ID - supports both JSON and HTML responses"""
-    logger.info("Get user endpoint called", extra={"user_id": user_id})
-    metrics.add_metric(name="GetUserRequests", unit=MetricUnit.Count, value=1)
     
     # Check Accept header for response format
     accept_header = app.current_event.headers.get("accept", "")
@@ -151,11 +125,8 @@ def get_user(user_id: str) -> Any:
 
 
 @app.post("/users")
-@tracer.capture_method
 def create_user() -> Dict[str, Any]:
     """Create a new user"""
-    logger.info("Create user endpoint called")
-    metrics.add_metric(name="CreateUserRequests", unit=MetricUnit.Count, value=1)
     
     try:
         # Parse request body
@@ -170,7 +141,7 @@ def create_user() -> Dict[str, Any]:
             name=request_data.name,
             email=request_data.email,
             active=True,
-            created_at=datetime.now(),
+            created_at=datetime.now().isoformat(),
             recent_activity=["Account created"]
         )
         
@@ -187,7 +158,6 @@ def create_user() -> Dict[str, Any]:
         return response.model_dump()
         
     except Exception as e:
-        logger.exception("Error creating user")
         error_response = ErrorResponse(
             error="ValidationError",
             message=f"Invalid request data: {str(e)}"
@@ -202,9 +172,6 @@ def create_user() -> Dict[str, Any]:
 @app.exception_handler(Exception)
 def handle_exception(ex: Exception) -> Dict[str, Any]:
     """Global exception handler"""
-    logger.exception("Unhandled exception occurred")
-    metrics.add_metric(name="Errors", unit=MetricUnit.Count, value=1)
-    
     error_response = ErrorResponse(
         error="InternalServerError",
         message="An unexpected error occurred"
@@ -212,9 +179,6 @@ def handle_exception(ex: Exception) -> Dict[str, Any]:
     return error_response.model_dump()
 
 
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.LAMBDA_FUNCTION_URL)
-@tracer.capture_lambda_handler
-@metrics.log_metrics
 def lambda_handler(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
     """Main Lambda handler"""
     return app.resolve(event, context)

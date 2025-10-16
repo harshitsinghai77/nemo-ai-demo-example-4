@@ -22,9 +22,6 @@ class ApiStack(Stack):
                 iam.ManagedPolicy.from_aws_managed_policy_name(
                     "service-role/AWSLambdaBasicExecutionRole"
                 ),
-                iam.ManagedPolicy.from_aws_managed_policy_name(
-                    "AWSXRayDaemonWriteAccess"
-                ),
             ],
         )
 
@@ -43,7 +40,7 @@ class ApiStack(Stack):
                 "POWERTOOLS_METRICS_NAMESPACE": "ApiService",
                 "LOG_LEVEL": "INFO",
             },
-            tracing=_lambda.Tracing.ACTIVE,
+
             log_retention=logs.RetentionDays.ONE_WEEK,
         )
 

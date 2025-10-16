@@ -1,13 +1,17 @@
 import json
 import pytest
-from moto import mock_lambda
 from src.handler import lambda_handler
 
 
 def test_index_endpoint():
     """Test the index endpoint returns HTML"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/",
         "rawQueryString": "",
         "headers": {"accept": "text/html"},
@@ -18,14 +22,19 @@ def test_index_endpoint():
     response = lambda_handler(event, None)
     
     assert response["statusCode"] == 200
-    assert "text/html" in response["headers"]["content-type"]
+    assert "text/html" in response["headers"]["Content-Type"]
     assert "AWS Lambda API Service" in response["body"]
 
 
 def test_ping_endpoint():
     """Test the ping endpoint"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/ping"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/ping"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/ping",
         "rawQueryString": "",
         "headers": {},
@@ -44,7 +53,12 @@ def test_ping_endpoint():
 def test_hello_endpoint_without_name():
     """Test the hello endpoint without name parameter"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/hello"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/hello"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/hello",
         "rawQueryString": "",
         "headers": {},
@@ -63,7 +77,12 @@ def test_hello_endpoint_without_name():
 def test_hello_endpoint_with_name():
     """Test the hello endpoint with name parameter"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/hello"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/hello"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/hello",
         "rawQueryString": "name=John",
         "headers": {},
@@ -82,7 +101,12 @@ def test_hello_endpoint_with_name():
 def test_status_endpoint():
     """Test the status endpoint"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/status"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/status"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/status",
         "rawQueryString": "",
         "headers": {},
@@ -102,7 +126,12 @@ def test_status_endpoint():
 def test_get_user_json():
     """Test getting user with JSON response"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/users/1"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/users/1"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/users/1",
         "pathParameters": {"user_id": "1"},
         "rawQueryString": "",
@@ -123,7 +152,12 @@ def test_get_user_json():
 def test_get_user_html():
     """Test getting user with HTML response"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/users/1"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/users/1"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/users/1",
         "pathParameters": {"user_id": "1"},
         "rawQueryString": "",
@@ -135,14 +169,19 @@ def test_get_user_html():
     response = lambda_handler(event, None)
     
     assert response["statusCode"] == 200
-    assert "text/html" in response["headers"]["content-type"]
+    assert "text/html" in response["headers"]["Content-Type"]
     assert "John Doe" in response["body"]
 
 
 def test_get_user_not_found():
     """Test getting non-existent user"""
     event = {
-        "requestContext": {"http": {"method": "GET", "path": "/users/999"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "GET", "path": "/users/999"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/users/999",
         "pathParameters": {"user_id": "999"},
         "rawQueryString": "",
@@ -159,7 +198,12 @@ def test_get_user_not_found():
 def test_create_user():
     """Test creating a new user"""
     event = {
-        "requestContext": {"http": {"method": "POST", "path": "/users"}},
+        "version": "2.0",
+        "requestContext": {
+            "http": {"method": "POST", "path": "/users"},
+            "stage": "$default",
+            "requestId": "test-request-id"
+        },
         "rawPath": "/users",
         "rawQueryString": "",
         "headers": {"content-type": "application/json"},

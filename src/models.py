@@ -15,7 +15,7 @@ class HelloResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     status: str
-    timestamp: datetime
+    timestamp: str  # Changed to string
     version: str
     uptime: str
     environment: str
@@ -26,7 +26,7 @@ class User(BaseModel):
     name: str
     email: str
     active: bool = True
-    created_at: Optional[datetime] = None
+    created_at: Optional[str] = None  # Changed to string
     recent_activity: Optional[List[str]] = None
 
 

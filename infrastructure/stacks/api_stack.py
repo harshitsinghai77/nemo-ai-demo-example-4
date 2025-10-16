@@ -38,8 +38,6 @@ class ApiStack(Stack):
             self,
             "CsvStorageBucket",
             bucket_name="nemo-ai-demo-example-4-bucket",  # As specified in Jira story
-            public_read_access=False,
-            public_write_access=False,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             encryption=s3.BucketEncryption.S3_MANAGED,
             removal_policy=RemovalPolicy.DESTROY,

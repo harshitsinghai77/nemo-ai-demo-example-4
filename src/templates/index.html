@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}API Documentation{% endblock %}
+
+{% block content %}
+<h1>🚀 AWS Lambda API Service</h1>
+<p>Welcome to our serverless API built with AWS Lambda, Powertools, and Function URLs!</p>
+
+<h2>Available Endpoints</h2>
+
+<div class="endpoint">
+    <h3><span class="method">GET</span> /</h3>
+    <p>API documentation and welcome page</p>
+</div>
+
+<div class="endpoint">
+    <h3><span class="method">GET</span> /ping</h3>
+    <p>Health check endpoint - returns service status</p>
+    <code>{"message": "pong", "status": "healthy"}</code>
+</div>
+
+<div class="endpoint">
+    <h3><span class="method">GET</span> /hello</h3>
+    <p>Greeting endpoint with optional name parameter</p>
+    <p><strong>Query Parameters:</strong></p>
+    <ul>
+        <li><code>name</code> (optional) - Your name for personalized greeting</li>
+    </ul>
+    <p><strong>Examples:</strong></p>
+    <ul>
+        <li><code>/hello</code> → "Hello, World!"</li>
+        <li><code>/hello?name=John</code> → "Hello, John!"</li>
+    </ul>
+</div>
+
+<div class="endpoint">
+    <h3><span class="method">GET</span> /status</h3>
+    <p>Detailed system status with timestamp and version info</p>
+</div>
+
+<div class="endpoint">
+    <h3><span class="method">GET</span> /users/{user_id}</h3>
+    <p>Get user information by ID (demo endpoint)</p>
+    <p><strong>Path Parameters:</strong></p>
+    <ul>
+        <li><code>user_id</code> - User identifier</li>
+    </ul>
+</div>
+
+<div class="endpoint">
+    <h3><span class="method">POST</span> /users</h3>
+    <p>Create a new user (demo endpoint)</p>
+    <p><strong>Request Body:</strong></p>
+    <code>{"name": "string", "email": "string"}</code>
+</div>
+
+<h2>Features</h2>
+<ul>
+    <li>✅ AWS Lambda with Function URLs</li>
+    <li>✅ AWS Powertools (Logging, Tracing, Metrics)</li>
+    <li>✅ Pydantic data validation</li>
+    <li>✅ Jinja2 templating</li>
+    <li>✅ CORS enabled</li>
+    <li>✅ Error handling</li>
+</ul>
+
+<p><em>Built with ❤️ using AWS CDK and GitHub Actions</em></p>
+{% endblock %}

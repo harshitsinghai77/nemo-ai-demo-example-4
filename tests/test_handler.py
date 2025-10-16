@@ -27,7 +27,7 @@ def test_index_endpoint():
     
     assert response["statusCode"] == 200
     assert "text/html" in response["headers"]["Content-Type"]
-    assert "AWS Lambda API Service" in response["body"]
+    assert "🚀 Nemo Lambda API Services" in response["body"]
 
 
 def test_ping_endpoint():

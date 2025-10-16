@@ -5,7 +5,7 @@ from aws_lambda_powertools.event_handler import LambdaFunctionUrlResolver, Respo
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
-from .models import (
+from models import (
     PingResponse, HelloResponse, StatusResponse, User, 
     CreateUserRequest, CreateUserResponse, ErrorResponse
 )

@@ -1,6 +1,10 @@
 import json
 import pytest
-from src.handler import lambda_handler
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from handler import lambda_handler
 
 
 def test_index_endpoint():

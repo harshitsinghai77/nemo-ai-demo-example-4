@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile - {{ user.name }}{% endblock %}
+
+{% block content %}
+<h1>👤 User Profile</h1>
+
+<div class="endpoint">
+    <h2>{{ user.name }}</h2>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>User ID:</strong> {{ user.id }}</p>
+    <p><strong>Status:</strong> 
+        <span style="color: {{ 'green' if user.active else 'red' }}">
+            {{ 'Active' if user.active else 'Inactive' }}
+        </span>
+    </p>
+    {% if user.created_at %}
+    <p><strong>Member since:</strong> {{ user.created_at }}</p>
+    {% endif %}
+</div>
+
+<h3>Recent Activity</h3>
+{% if user.recent_activity %}
+<ul>
+    {% for activity in user.recent_activity %}
+    <li>{{ activity }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p><em>No recent activity</em></p>
+{% endif %}
+
+<p><a href="/">← Back to API Documentation</a></p>
+{% endblock %}

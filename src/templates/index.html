@@ -14,6 +14,27 @@
 </div>
 
 <div class="endpoint">
+    <h3><span class="method">GET</span> /csv-upload</h3>
+    <p>CSV file upload interface for user data</p>
+    <p>Upload, preview, and submit CSV files with user information to S3 and DynamoDB</p>
+    <p><a href="/csv-upload">🔗 Open CSV Upload Interface</a></p>
+</div>
+
+<div class="endpoint">
+    <h3><span class="method">POST</span> /csv-preview</h3>
+    <p>Preview CSV file contents and validation results</p>
+    <p><strong>Content-Type:</strong> multipart/form-data</p>
+    <p><strong>Expected columns:</strong> user_id, name, email, phone_number, country, state, city, signup_date, last_active_date</p>
+</div>
+
+<div class="endpoint">
+    <h3><span class="method">POST</span> /csv-submit</h3>
+    <p>Submit CSV file for processing - saves raw file to S3 and writes data to DynamoDB</p>
+    <p><strong>Content-Type:</strong> multipart/form-data</p>
+    <p><strong>Max file size:</strong> 5MB</p>
+</div>
+
+<div class="endpoint">
     <h3><span class="method">GET</span> /ping</h3>
     <p>Health check endpoint - returns service status</p>
     <code>{"message": "pong", "status": "healthy"}</code>

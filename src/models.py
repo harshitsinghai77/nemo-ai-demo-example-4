@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr, validator
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 
@@ -45,3 +45,35 @@ class CreateUserResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
     message: str
+
+
+# CSV Upload Models
+class UserDataRow(BaseModel):
+    user_id: Optional[str] = None
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
+    signup_date: Optional[str] = None
+    last_active_date: Optional[str] = None
+
+
+class CSVPreviewResponse(BaseModel):
+    status: str
+    message: str
+    valid_columns: List[str]
+    invalid_columns: List[str]
+    total_rows: int
+    valid_rows: int
+    preview_data: List[Dict[str, Any]]
+    errors: List[str] = []
+
+
+class CSVUploadResponse(BaseModel):
+    status: str
+    message: str
+    s3_file_key: Optional[str] = None
+    dynamodb_records_written: int = 0
+    errors: List[str] = []

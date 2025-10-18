@@ -1,19 +1,41 @@
-# 🚀 Nemo Lambda API Services
+# AWS Lambda API with Powertools
 
-Welcome to the **Nemo Lambda API**, a lightweight, serverless API built with **AWS Lambda**, **Powertools for AWS**, and **Function URLs**.
+A serverless API built with AWS Lambda, Powertools, and Function URLs.
 
----
+## Features
 
-## 🌐 Deployed Endpoint
+- AWS Lambda with Function URLs
+- AWS Powertools for Python
+- Pydantic for data validation
+- AWS CDK for infrastructure
+- GitHub Actions for CI/CD
 
-👉 Base URL: [`https://wxj6h2oi4fasknoyy3evpsiibu0fbvqb.lambda-url.us-east-1.on.aws/`](https://wxj6h2oi4fasknoyy3evpsiibu0fbvqb.lambda-url.us-east-1.on.aws/)
+## API Endpoints
 
-### 🔍 Endpoints
-
-- `GET /` - Index endpoint
 - `GET /ping` - Health check endpoint
 - `GET /hello` - Hello world endpoint
-- `GET /status` - Status endpoint
-- `GET /users` - Get all users
-- `POST /users` - Create a new user
----
+
+## Setup
+
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Deploy infrastructure:
+```bash
+cd infrastructure
+cdk deploy
+```
+
+## Development
+
+Run tests:
+```bash
+pytest
+```
+
+Format code:
+```bash
+black .
+```
